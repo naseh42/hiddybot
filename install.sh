@@ -1,4 +1,4 @@
-cat > install.sh <<'EOF'
+cat > install.sh <<'SCRIPT'
 #!/usr/bin/env bash
 set -e
 
@@ -7,21 +7,21 @@ mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 [[ ! -d .git ]] && git clone https://github.com/naseh42/hiddybot.git . || git pull origin main
 
-# نصب داکر در صورت لزوم
+# install Docker if needed
 if ! command -v docker &>/dev/null; then
     sudo apt-get update -y
     sudo apt-get install -y docker.io docker-compose
     sudo systemctl enable --now docker
 fi
 
-# wizard دریافت اطلاعات
+# interactive wizard
 read -rp "توکن ربات تلگرام: " BOT_TOKEN
 read -rp "آیدی عددی ادمین: " ADMIN_ID
 read -rp "لینک ادمین پنل Hiddify (https://.../admin/): " HIDDIY_ADMIN_URL
 read -rp "Secret Code (UUID) پنل: " HIDDIY_UUID
 read -rp "رمز عبور اضافی پنل: " HIDDIY_PASSWORD
 
-# ساخت مستقیم .env
+# write .env
 cat > .env <<EOF
 BOT_TOKEN=$BOT_TOKEN
 ADMIN_ID=$ADMIN_ID
@@ -35,9 +35,8 @@ EOF
 mkdir -p data data/receipts
 docker compose down 2>/dev/null || true
 docker compose up -d --build
-
 echo "✅ ربات آماده است؛ در تلگرام /start بزنید."
-EOF
+SCRIPT
 
 chmod +x install.sh
 ./install.sh
