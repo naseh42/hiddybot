@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  bot:
+    build: .
+    container_name: hiddify_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
