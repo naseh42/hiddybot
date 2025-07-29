@@ -4,34 +4,41 @@ set -e
 echo "▶️  نصب ربات تلگرام Hiddify VPN ..."
 echo "------------------------------------------------"
 
-# 1) نصب داکر (در صورت نیاز)
-if ! command -v docker &> /dev/null; then
-    echo "در حال نصب Docker ..."
+# تابع نصب داکر از مخزن اوبونتو
+install_docker() {
+    echo "📦 در حال نصب Docker از مخزن Ubuntu ..."
     sudo apt-get update -y
     sudo apt-get install -y docker.io docker-compose
     sudo systemctl enable --now docker
+}
+
+# بررسی وجود داکر
+if ! command -v docker &> /dev/null; then
+    install_docker
+else
+    echo "✅ Docker قبلاً نصب شده است."
 fi
 
-# 2) ساخت پوشه پروژه
+# مسیر نصب
 INSTALL_DIR="/opt/hiddybot"
 mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
-# 3) clone یا update از گیت
+# clone یا update
 if [[ ! -d .git ]]; then
     git clone https://github.com/naseh42/hiddybot.git .
 else
     git pull origin main
 fi
 
-# 4) wizard دریافت اطلاعات
-read -rp "لطفاً توکن ربات تلگرام را وارد کنید: " BOT_TOKEN
-read -rp "آیدی عددی ادمین تلگرام: " ADMIN_ID
-read -rp "لینک کامل ادمین پنل Hiddify (مثلاً https://.../admin/): " HIDDIY_ADMIN_URL
+# wizard تعاملی
+read -rp "توکن ربات تلگرام: " BOT_TOKEN
+read -rp "آیدی عددی ادمین: " ADMIN_ID
+read -rp "لینک ادمین پنل Hiddify (https://.../admin/): " HIDDIY_ADMIN_URL
 read -rp "Secret Code (UUID) پنل: " HIDDIY_UUID
 read -rp "رمز عبور اضافی پنل: " HIDDIY_PASSWORD
 
-# 5) ساخت فایل .env
+# ساخت .env
 cat > .env <<EOF
 BOT_TOKEN=$BOT_TOKEN
 ADMIN_ID=$ADMIN_ID
@@ -42,12 +49,12 @@ DB_URL=sqlite:///bot.db
 SETUP_DONE=false
 EOF
 
-# 6) ساخت دایرکتوری‌های داده
+# پوشه‌های داده
 mkdir -p data data/receipts
 
-# 7) build & run
+# build و run
 docker compose down || true
 docker compose up -d --build
 
 echo "✅ ربات با موفقیت نصب و اجرا شد."
-echo "برای تنظیمات اولیه در تلگرام /start را ارسال کنید."
+echo "در تلگرام /start را ارسال کنید تا wizard شروع شود."
